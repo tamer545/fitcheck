@@ -21,6 +21,7 @@ const Index = () => {
                 const user = userCredential.user;
                 setLoggedIn(true)
                 await AsyncStorage.setItem('uid', user.uid);
+                await AsyncStorage.setItem('user', user.email || user.displayName || user.uid);
                 console.log(user)
             })
             .catch((error) => {
@@ -43,6 +44,7 @@ const Index = () => {
                 .catch((error) => {
                     const errorCode = error.code;
                     const errorMessage = error.message;
+                    console.log(errorMessage)
                 });
         }
     }
