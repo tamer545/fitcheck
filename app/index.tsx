@@ -41,7 +41,7 @@ const Index = () => {
                     loginWithEmailAndPassword();
                     firebase.app().database()
                         .ref(`users/${user.uid}/details`)
-                        .set({firstname: firstname, lastname: lastname})
+                        .set({firstname: firstname, lastname: lastname, trainingsplan: "abnehmen"})
                 })
                 .catch((error) => {
                     const errorCode = error.code;

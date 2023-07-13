@@ -1,16 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {Button, SafeAreaView, StyleSheet, Text, TouchableHighlight, View} from 'react-native';
-import firebase from "firebase/compat";
-import {Link, Redirect} from "expo-router";
 import * as Location from "expo-location";
 import {LocationAccuracy, LocationGeocodedAddress, LocationObjectCoords, LocationSubscription} from "expo-location";
 import Spinner from "react-native-loading-spinner-overlay";
 import MapView, {Marker} from "react-native-maps";
 
 // @ts-ignore
-import { Stopwatch } from 'react-native-stopwatch-timer';
-
-
+import {Stopwatch, Timer} from 'react-native-stopwatch-timer';
+import firebase from "firebase/compat";
 
 export default function App() {
     const [currentLocation, setCurrentLocation] = useState<LocationObjectCoords>();
@@ -27,6 +24,12 @@ export default function App() {
     const [running, setRunning] = useState(false)
     const [isStopwatchStart, setIsStopwatchStart] = useState(false);
     const [resetStopwatch, setResetStopwatch] = useState(false);
+    const [trainingsplan, setTrainingsplan] = useState<Array<{ Dauer: number, name: string, img: string }>>();
+
+    const [minutes, setMinutes] = useState(0);
+    const [seconds, setSeconds] = useState(0);
+    const [task, setTask] = useState(-1);
+    const [done, setDone] = useState(false);
 
     useEffect(() => {
         (() => {
@@ -50,6 +53,7 @@ export default function App() {
         })()
     }, [])
 
+
     useEffect(() => {
         (async () => {
             let {status} = await Location.requestForegroundPermissionsAsync();
@@ -64,8 +68,73 @@ export default function App() {
         })();
     }, []);
 
-    if (training) {
+    useEffect(() => {
+        while (seconds >= 60) {
+            setSeconds(seconds => seconds - 60)
+            setMinutes(minutes => minutes + 1)
+        }
+        if (seconds === 0) {
+            if (minutes === 0) {
+                nextTask()
+            } else {
+                setMinutes(minutes => minutes - 1)
+                setSeconds(60)
+            }
+        }
+    }, [seconds])
 
+    function nextTask() {
+        setTask(task => task + 1);
+        console.log(trainingsplan?.length)
+        console.log(task)
+        if (trainingsplan && trainingsplan.length > task) {
+            setSeconds(trainingsplan[task].Dauer)
+        } else if(trainingsplan && trainingsplan.length === task){
+            setDone(true);
+        }
+    }
+
+    function newSecond() {
+        setSeconds(seconds => seconds - 1)
+    }
+
+    function startTraining() {
+        firebase.app().database()
+            .ref(`users/${firebase.app().auth().currentUser?.uid}/details`)
+            .get().then(snapshot => {
+            firebase.app().database()
+                .ref(`trainings/${snapshot.val().trainingsplan}`)
+                .get().then(snapshot => {
+                    setTrainingsplan(snapshot.val())
+                    setSeconds(snapshot.val()[task].Dauer);
+                    setInterval(newSecond, 1000);
+                }
+            )
+        })
+        setTraining(true);
+    }
+
+    if (done){
+        return (
+            <SafeAreaView style={styles.container}>
+                <Text style={styles.paragraph}>
+                    Well Done!
+                </Text>
+            </SafeAreaView>
+        )
+    }
+
+    if (training) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <Text style={styles.paragraph}>
+                    {minutes} : {seconds}
+                </Text>
+                <Text style={styles.paragraph}>
+                    {trainingsplan ? trainingsplan[task].name : ""}
+                </Text>
+            </SafeAreaView>
+        )
     } else if (running) {
         return (
             <SafeAreaView>
@@ -96,7 +165,6 @@ export default function App() {
                                 options={options}
                                 //options for the styling
                                 getTime={(time: any) => {
-                                    console.log(time);
                                 }}
                             />
                             <TouchableHighlight
@@ -127,7 +195,7 @@ export default function App() {
             <SafeAreaView style={styles.container}>
                 <View>
                     <Text style={styles.paragraph}>Training</Text>
-                    <Button title={"Training Starten"}/>
+                    <Button title={"Training Starten"} onPress={() => startTraining()}/>
                     <Text style={styles.paragraph}>Lauf</Text>
                     <Button title={"Lauf starten"} onPress={() => setRunning(true)}/>
                 </View>
