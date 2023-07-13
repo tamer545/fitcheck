@@ -1,17 +1,21 @@
-import { Stack } from "expo-router";
+import {Stack} from "expo-router";
+import firebase from "firebase/compat";
+import {useState} from "react";
+
 
 export default function HomeLayout() {
+
     return (
         <Stack
             screenOptions={{
                 headerStyle: {
                     backgroundColor: "gray",
                 },
-                headerTintColor: "orange",
+                headerTintColor: "lightblue",
                 headerTitleStyle: {
                     fontWeight: "bold",
                 },
-                headerTitle: "Fitcheck"
+                headerTitle: "Fitcheck  "
             }}
         >
             <Stack.Screen

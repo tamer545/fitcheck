@@ -1,9 +1,8 @@
-import { Redirect } from "expo-router";
+import {Redirect} from "expo-router";
 import React, {useState} from "react";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword  } from "firebase/auth";
+import {createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword} from "firebase/auth";
 import {Button, SafeAreaView, StyleSheet, TextInput} from "react-native";
 import firebase from "firebase/compat";
-import User = firebase.User;
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Index = () => {
@@ -12,8 +11,9 @@ const Index = () => {
     const [passwordConfirm, setPasswordConfirm] = useState("");
     const [loggedIn, setLoggedIn] = useState(false);
     const [register, setRegister] = useState(false);
+    const [firstname, setFirstname] = useState("");
+    const [lastname, setLastname] = useState("");
     const auth = getAuth();
-
     function loginWithEmailAndPassword() {
         signInWithEmailAndPassword(auth, email, password)
             .then(async (userCredential) => {
@@ -21,7 +21,6 @@ const Index = () => {
                 const user = userCredential.user;
                 setLoggedIn(true)
                 await AsyncStorage.setItem('uid', user.uid);
-                await AsyncStorage.setItem('user', user.email || user.displayName || user.uid);
                 console.log(user)
             })
             .catch((error) => {
@@ -40,12 +39,14 @@ const Index = () => {
                     const user = userCredential.user;
                     console.log(user);
                     loginWithEmailAndPassword();
+                    firebase.app().database()
+                        .ref(`users/${user.uid}/details`)
+                        .set({firstname: firstname, lastname: lastname})
                 })
                 .catch((error) => {
                     const errorCode = error.code;
                     const errorMessage = error.message;
                     console.log(errorMessage)
-
                 });
         }
     }
@@ -57,6 +58,20 @@ const Index = () => {
     if (register){
         return (
             <SafeAreaView style={styles.container}>
+                <TextInput
+                    style={styles.input}
+                    onChangeText={(text) => setFirstname(text)}
+                    value={firstname}
+                    placeholder="Vorname"
+                    keyboardType="default"
+                />
+                <TextInput
+                    style={styles.input}
+                    onChangeText={(text) => setLastname(text)}
+                    value={lastname}
+                    placeholder="Nachname"
+                    keyboardType="default"
+                />
                 <TextInput
                     style={styles.input}
                     onChangeText={(text) => setEmail(text)}

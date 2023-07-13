@@ -22,12 +22,12 @@ export function getRecommendations(id: number) {
         case 321:
         case 500:
         case 501:
+        case 520:
             return 'Falls es okay für dich ist, nass zu werden, kannst du draussen trainieren. Ziehe aber am besten eine Regenjacke oder ähnliches an.';
         case 502:
         case 503:
         case 504:
         case 511:
-        case 520:
         case 521:
         case 522:
         case 531:

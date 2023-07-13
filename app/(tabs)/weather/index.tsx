@@ -1,11 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import {Button, SafeAreaView, StyleSheet, Text, View} from 'react-native';
 import * as Location from 'expo-location';
 import {LocationAccuracy, LocationGeocodedAddress, LocationObjectCoords, LocationSubscription} from 'expo-location';
 import Spinner from "react-native-loading-spinner-overlay";
 import MapView, {Marker} from "react-native-maps";
 import * as child_process from "child_process";
 import {getRecommendations} from "./recommendations";
+import firebase from "firebase/compat";
 
 export default function App() {
     const [currentLocation, setCurrentLocation] = useState<LocationObjectCoords>();
@@ -93,6 +94,7 @@ export default function App() {
             descriptionID: data.weather[0].id,
         })
     }
+
 
     if (!errorMsg) {
         return (
