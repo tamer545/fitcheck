@@ -62,12 +62,8 @@ export default function App() {
 
     }
     else if (running){
-
-    }
-
-    if (!errorMsg) {
         return (
-            <SafeAreaView style={styles.container}>
+            <SafeAreaView>
                 {loading ? (
                     <View style={styles.container}>
                         <Spinner
@@ -77,25 +73,26 @@ export default function App() {
                         />
                     </View>
                 ) : (
+                <MapView
+                            style={{height: 300}}
+                            region={mapRegion}
+                        >
+                            <Marker coordinate={mapRegion} title='Marker'/>
+                        </MapView>
+                    )}
+            </SafeAreaView>
+        )
+    }
+
+    if (!errorMsg) {
+        return (
+            <SafeAreaView style={styles.container}>
                     <View>
                         <Text style={styles.paragraph}>Training</Text>
-                        {/*<MapView
-                            style={{height: 300}}
-                            region={mapRegion}
-                        >
-                            <Marker coordinate={mapRegion} title='Marker'/>
-                        </MapView>*/}
                         <Button title={"Training Starten"}/>
                         <Text style={styles.paragraph}>Lauf</Text>
-                        {/*<MapView
-                            style={{height: 300}}
-                            region={mapRegion}
-                        >
-                            <Marker coordinate={mapRegion} title='Marker'/>
-                        </MapView>*/}
-                        <Button title={"Lauf Starten"}/>
+                        <Button title={"Lauf Starten"} onPress={() => setRunning(true)}/>
                     </View>
-                )}
             </SafeAreaView>
 
         )
