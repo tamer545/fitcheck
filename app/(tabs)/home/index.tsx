@@ -1,19 +1,16 @@
-import React, {useEffect, useState} from 'react';
-import {Button, SafeAreaView, StyleSheet, Text, TouchableHighlight, View} from 'react-native';
-import firebase from "firebase/compat";
-import {Link, Redirect} from "expo-router";
-import * as Location from "expo-location";
-import {LocationAccuracy, LocationGeocodedAddress, LocationObjectCoords, LocationSubscription} from "expo-location";
-import Spinner from "react-native-loading-spinner-overlay";
-import MapView, {Marker} from "react-native-maps";
-
+import React, {useEffect, useRef, useState} from 'react';
+import {SafeAreaView, StyleSheet, Text, View, TouchableHighlight, Button} from 'react-native';
 // @ts-ignore
-import { Stopwatch } from 'react-native-stopwatch-timer';
-
+import {Stopwatch, Timer} from 'react-native-stopwatch-timer';
+import * as Location from "expo-location";
+import {LocationAccuracy, LocationObject, LocationObjectCoords, LocationSubscription} from "expo-location";
+import Spinner from "react-native-loading-spinner-overlay";
+import MapView, {MapMarker, MapPolyline} from "react-native-maps";
+import {Pedometer} from "expo-sensors";
+import firebase from "firebase/compat";
 
 
 export default function App() {
-    const [currentLocation, setCurrentLocation] = useState<LocationObjectCoords>();
     const [errorMsg, setErrorMsg] = useState<string>("");
     const [loading, setLoading] = useState(true);
     const [watcher, setWatcher] = useState<LocationSubscription>();
@@ -24,31 +21,43 @@ export default function App() {
         longitudeDelta: 0,
     });
     const [training, setTraining] = useState(false)
+    const [initialLocation, setInitialLocation] = useState<LocationObject>()
     const [running, setRunning] = useState(false)
     const [isStopwatchStart, setIsStopwatchStart] = useState(false);
     const [resetStopwatch, setResetStopwatch] = useState(false);
+    const [runningCoords, setRunningCoords] = useState<{ latitude: number, longitude: number }[]>([])
+    const [isPedometerAvailable, setIsPedometerAvailable] = useState('checking');
+    const [pastStepCount, setPastStepCount] = useState(0);
+    const [currentStepCount, setCurrentStepCount] = useState(0);
+    const [currentTime, setCurrentTime] = useState("");
 
     useEffect(() => {
+        if (!initialLocation)
+            return
         (() => {
             Location.watchPositionAsync({
                 accuracy: LocationAccuracy.Highest,
-                distanceInterval: 100,
-                timeInterval: 10000
+                timeInterval: 5000,
+                distanceInterval: 1
             }, ({coords}) => {
-                setCurrentLocation(coords);
                 setMapRegion(() => {
                     return {
                         latitude: coords.latitude, longitude: coords.longitude, latitudeDelta: 0.01,
                         longitudeDelta: 0.01,
                     }
                 })
+                setRunningCoords((runningCoords) => {
+                    return [...runningCoords, {latitude: coords.latitude, longitude: coords.longitude}]
+                })
             }).then((locationWatcher) => {
                 setWatcher(locationWatcher);
             }).catch((err) => {
                 console.log(err)
             })
-        })()
-    }, [])
+        })();
+
+        return () => watcher?.remove()
+    }, [initialLocation])
 
     useEffect(() => {
         (async () => {
@@ -59,10 +68,45 @@ export default function App() {
             }
 
             let location = await Location.getCurrentPositionAsync({});
-            setCurrentLocation(location.coords);
+            setInitialLocation(location);
+            setRunningCoords([{latitude: location.coords.latitude, longitude: location.coords.longitude}])
             setLoading(false)
         })();
     }, []);
+
+    useEffect(() => {
+        const subscription = subscribe();
+        return () => {
+            subscription && subscription.then((value) => value?.remove())
+        };
+    }, []);
+
+    const subscribe = async () => {
+        const isAvailable = await Pedometer.isAvailableAsync();
+        setIsPedometerAvailable(String(isAvailable));
+
+        if (isAvailable) {
+            const end = new Date();
+            const start = new Date();
+            start.setDate(end.getDate() - 1);
+
+            const pastStepCountResult = await Pedometer.getStepCountAsync(start, end);
+            if (pastStepCountResult) {
+                setPastStepCount(pastStepCountResult.steps);
+            }
+
+            return Pedometer.watchStepCount(result => {
+                setCurrentStepCount(result.steps);
+            });
+        }
+    };
+
+    const getNumberOfRuns = async () => {
+        const snapshot = await firebase.app().database()
+            .ref(`users/${firebase.app().auth().currentUser?.uid}/runs`)
+            .get()
+        return snapshot.numChildren()
+    }
 
     if (training) {
 
@@ -82,39 +126,37 @@ export default function App() {
                         <MapView
                             style={{height: 300}}
                             region={mapRegion}
+                            zoomEnabled={false}
                         >
+                            <MapPolyline
+                                coordinates={runningCoords || [{longitude: 0, latitude: 0}]}
+                                strokeWidth={10}
+                                strokeColor="#00a8ff"
+                            />
+                            <MapMarker coordinate={{
+                                longitude: initialLocation?.coords.longitude || 0,
+                                latitude: initialLocation?.coords.latitude || 0
+                            }}/>
                         </MapView>
-                        <Button title={"Lauf beenden"} onPress={() => setRunning(false)}/>
+                        <Button title={"Lauf beenden"} onPress={async () => {
+                            await firebase.app().database()
+                                .ref(`users/${firebase.app().auth().currentUser?.uid}/runs/${await getNumberOfRuns() + 1}`)
+                                .set({runningCoords: runningCoords, steps: currentStepCount, time: currentTime})
+                            setRunning(false)
+                            setIsStopwatchStart(false);
+                            setResetStopwatch(true);
+                            setRunningCoords([])
+                        }}/>
                         <View style={styles.sectionStyle}>
                             <Stopwatch
                                 laps
-                                msecs
                                 start={isStopwatchStart}
-                                //To start
                                 reset={resetStopwatch}
-                                //To reset
                                 options={options}
-                                //options for the styling
-                                getTime={(time: any) => {
-                                    console.log(time);
-                                }}
+                                getTime={(time: any) => setCurrentTime(time)}
                             />
-                            <TouchableHighlight
-                                onPress={() => {
-                                    setIsStopwatchStart(!isStopwatchStart);
-                                    setResetStopwatch(false);
-                                }}>
-                                <Text style={styles.buttonText}>
-                                    {!isStopwatchStart ? 'START' : 'STOP'}
-                                </Text>
-                            </TouchableHighlight>
-                            <TouchableHighlight
-                                onPress={() => {
-                                    setIsStopwatchStart(false);
-                                    setResetStopwatch(true);
-                                }}>
-                                <Text style={styles.buttonText}>RESET</Text>
-                            </TouchableHighlight>
+                            <Text style={styles.buttonText}>Schritte</Text>
+                            <Text>{currentStepCount}</Text>
                         </View>
                     </View>
                 )}
@@ -129,7 +171,12 @@ export default function App() {
                     <Text style={styles.paragraph}>Training</Text>
                     <Button title={"Training Starten"}/>
                     <Text style={styles.paragraph}>Lauf</Text>
-                    <Button title={"Lauf starten"} onPress={() => setRunning(true)}/>
+                    <Button title={"Lauf starten"} onPress={() => {
+                        setRunning(true)
+                        setIsStopwatchStart(true);
+                        setResetStopwatch(false);
+                    }
+                    }/>
                 </View>
             </SafeAreaView>
 
@@ -155,9 +202,7 @@ const styles = StyleSheet.create({
     },
     spinnerTextStyle: {
         color: '#FFF',
-    },
-    sectionStyle: {
-        flex: 1,
+    }, sectionStyle: {
         marginTop: 32,
         alignItems: 'center',
         justifyContent: 'center',
@@ -166,11 +211,12 @@ const styles = StyleSheet.create({
         fontSize: 20,
         marginTop: 10,
     },
-});
+})
+
 
 const options = {
     container: {
-        backgroundColor: '#FF0000',
+        backgroundColor: '#505050',
         padding: 5,
         borderRadius: 5,
         width: 200,
