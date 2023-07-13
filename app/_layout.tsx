@@ -1,18 +1,17 @@
 import { Stack } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default async function HomeLayout() {
+export default function HomeLayout() {
     return (
         <Stack
             screenOptions={{
                 headerStyle: {
-                    backgroundColor: "lightblue",
+                    backgroundColor: "gray",
                 },
-                headerTintColor: "darkblue",
+                headerTintColor: "orange",
                 headerTitleStyle: {
                     fontWeight: "bold",
                 },
-                headerTitle: "Fitcheck      " + await AsyncStorage.getItem('user')
+                headerTitle: "Fitcheck"
             }}
         >
             <Stack.Screen
