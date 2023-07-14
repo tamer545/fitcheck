@@ -1,12 +1,28 @@
 import React, {useEffect, useState} from 'react';
-import {FlatList, SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import {FlatList, RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native';
 import firebase from "firebase/compat";
 import MapView, {MapMarker, MapPolyline} from "react-native-maps";
 
 
 export default function App() {
     const [runs, setRuns] = useState<any[]>()
+    const [refreshing, setRefreshing] = React.useState(false);
 
+    const onRefresh = React.useCallback(() => {
+        (() => {
+            firebase.app().database()
+                .ref(`users/${firebase.app().auth().currentUser?.uid}/runs`)
+                .get()
+                .then(snapshot => {
+                    setRuns(snapshot.val())
+                })
+        })()
+
+        setRefreshing(true);
+        setTimeout(() => {
+            setRefreshing(false);
+        }, 2000);
+    }, []);
 
     useEffect(() => {
         (() => {
@@ -26,11 +42,15 @@ export default function App() {
             return (
                 // Single Comes here which will be repeatative for the FlatListItems
                 <View>
-                    <Text style={styles.paragraph} onPress={() => getItem(item)}>
+                    <Text style={styles.paragraph}>
                         Lauf Nummer: {runs?.indexOf(item)} Laufzeit: {item?.time}
+
+                    </Text>
+                    <Text style={styles.paragraph}>
+                        Durchgeführt am: {item?.timeOfRun}
                     </Text>
                     <MapView
-                        style={{height: 200, margin: 30}}
+                        style={{height: 200, marginBottom: 50}}
                         region={item?.region}
                     >
                         <MapPolyline
@@ -49,15 +69,11 @@ export default function App() {
         )
     };
 
-    const getItem = (item: any) => {
-        //Function for click on an item
-        alert('Zeit : ' + item?.time + ' Schritte : ' + item?.steps);
-    };
-
     return (
         <SafeAreaView>
-            <FlatList data={runs} renderItem={ItemView}/>
-
+            <FlatList data={runs} renderItem={ItemView} refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>
+            }/>
         </SafeAreaView>
     )
 
@@ -72,7 +88,6 @@ const styles = StyleSheet.create({
     },
     paragraph: {
         fontSize: 15,
-        marginTop: 30,
         marginLeft: 30,
         marginRight: 30,
         textAlign: "center"
