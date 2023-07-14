@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Button, SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import {Button, Image, SafeAreaView, StyleSheet, Text, View} from 'react-native';
 // @ts-ignore
 import {Stopwatch, Timer} from 'react-native-stopwatch-timer';
 import * as Location from "expo-location";
@@ -9,6 +9,27 @@ import MapView, {MapMarker, MapPolyline} from "react-native-maps";
 import {Pedometer} from "expo-sensors";
 
 import firebase from "firebase/compat";
+
+const ImageSelect = ({name}: { name: string }) => {
+    switch (name) {
+        case "Liegestützen":
+            return <Image style={styles.image}
+                          source={require("../../../assets/images/liegestuetzen.png")}/>
+        case "Kniebeugen":
+            return <Image style={styles.image}
+                          source={require("../../../assets/images/knieBeugen.png")}/>
+        case "Hampelmänner":
+            return <Image style={styles.image}
+                          source={require("../../../assets/images/jumpingJacks.png")}/>
+        case "Planks":
+            return <Image style={styles.image} source={require("../../../assets/images/planks.png")}/>
+        case "Rumpfbeugen":
+            return <Image style={styles.image}
+                          source={require("../../../assets/images/rumpfbeugen.png")}/>
+        default:
+            return <View />
+    }
+}
 
 export default function App() {
     const [errorMsg, setErrorMsg] = useState<string>("");
@@ -30,12 +51,12 @@ export default function App() {
     const [minutes, setMinutes] = useState(0);
     const [seconds, setSeconds] = useState(0);
     const [task, setTask] = useState(-1);
-    const [done, setDone] = useState(false);
     const [runningCoords, setRunningCoords] = useState<{ latitude: number, longitude: number }[]>([])
     const [isPedometerAvailable, setIsPedometerAvailable] = useState('checking');
     const [pastStepCount, setPastStepCount] = useState(0);
     const [currentStepCount, setCurrentStepCount] = useState(0);
     const [currentTime, setCurrentTime] = useState("");
+    const [timer, setTimer] = useState<NodeJS.Timer>();
 
     useEffect(() => {
         if (!initialLocation)
@@ -81,7 +102,6 @@ export default function App() {
     }, []);
 
     useEffect(() => {
-        console.log(seconds)
         while (seconds > 60) {
             setSeconds(seconds => seconds - 60)
             setMinutes(minutes => minutes + 1)
@@ -96,17 +116,21 @@ export default function App() {
         }
     }, [seconds])
 
+    useEffect(() => {
+        const subscription = subscribe();
+        return () => {
+            subscription && subscription.then((value) => value?.remove())
+        };
+    }, []);
+
     function nextTask() {
         let newTask = task + 1;
         setTask(newTask);
-        console.log(trainingsplan?.length)
-        console.log(newTask)
         if (trainingsplan && trainingsplan.length > newTask) {
-            console.log(trainingsplan[newTask].Dauer)
             setSeconds(trainingsplan[newTask].Dauer)
         } else if (trainingsplan && trainingsplan.length === newTask) {
-            console.log("done")
-            setDone(true);
+            clearInterval(timer);
+            setTraining(false)
         }
     }
 
@@ -115,6 +139,7 @@ export default function App() {
     }
 
     function startTraining() {
+
         firebase.app().database()
             .ref(`users/${firebase.app().auth().currentUser?.uid}/details`)
             .get().then(snapshot => {
@@ -122,30 +147,18 @@ export default function App() {
                 .ref(`trainings/${snapshot.val().trainingsplan}`)
                 .get().then(snapshot => {
                     setTrainingsplan(snapshot.val())
-                    setSeconds(snapshot.val()[task].Dauer);
-                    setInterval(newSecond, 1000);
+                    if (task > 0) {
+                        setSeconds(snapshot.val()[0].Dauer);
+                        setTask(0);
+                    }else {
+                        setSeconds(snapshot.val()[task].Dauer);
+                    }
+                    setTimer(setInterval(newSecond, 1000));
                 }
             )
         })
         setTraining(true);
     }
-
-    if (done) {
-        return (
-            <SafeAreaView style={styles.container}>
-                <Text style={styles.paragraph}>
-                    Well Done!
-                </Text>
-            </SafeAreaView>
-        )
-    }
-
-    useEffect(() => {
-        const subscription = subscribe();
-        return () => {
-            subscription && subscription.then((value) => value?.remove())
-        };
-    }, []);
 
     const subscribe = async () => {
         const isAvailable = await Pedometer.isAvailableAsync();
@@ -181,8 +194,13 @@ export default function App() {
                     {minutes} : {seconds}
                 </Text>
                 <Text style={styles.paragraph}>
-                    {trainingsplan ? trainingsplan[task].name : ""}
+                    {trainingsplan ? trainingsplan[task]?.name : ""}
                 </Text>
+                <ImageSelect name={trainingsplan ? trainingsplan[task]?.name : ""} />
+                <Button title={"Training beenden"} onPress={() => {
+                    clearInterval(timer);
+                    setTraining(false);
+                }}/>
             </SafeAreaView>
         )
     } else if (running) {
@@ -252,7 +270,10 @@ export default function App() {
                 <View>
                     <Text style={styles.paragraph}>Training</Text>
                     <Text style={styles.paragraph}>Um den Trainingsplan zu ändern gehe in die Einstellungen</Text>
-                    <Button title={"Training Starten"} onPress={() => startTraining()}/>
+                    <Button title={"Training Starten"} onPress={() => {
+
+                        startTraining()
+                    }}/>
                     <Text style={styles.paragraph}>Lauf</Text>
                     <Button title={"Lauf starten"} onPress={() => {
                         setRunning(true)
@@ -294,6 +315,10 @@ const styles = StyleSheet.create({
         fontSize: 20,
         marginTop: 10,
     },
+    image: {
+        width: 400,
+        height: 300
+    }
 })
 
 

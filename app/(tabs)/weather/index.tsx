@@ -81,7 +81,6 @@ export default function App() {
         const api_call = await
             fetch(`//api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=406439182dd5d5f377e4b5c34dd8c694&units=metric&lang=de`);
         const data = await api_call.json();
-        console.log(data)
         setWeather({
             lat: latitude,
             lon: longitude,

@@ -37,7 +37,6 @@ export default function App() {
 
 
     const ItemView = ({item}: any) => {
-        console.log(runs)
         if (item) {
             return (
                 // Single Comes here which will be repeatative for the FlatListItems

@@ -1,12 +1,15 @@
 import React, {useEffect, useState} from 'react';
 import {Button, StyleSheet, Text, View} from 'react-native';
 import firebase from "firebase/compat";
+import {useRouter} from "expo-router";
+
 
 export default function App() {
     const [firstname, setFirstname] = useState("")
     const [lastname, setLastname] = useState("")
     const [trainingsplan, setTrainingsplan] = useState<string>()
     const [possibleTrainingsplans, setPossibleTrainingsplans] = useState<string[]>()
+    const router = useRouter();
 
     useEffect(() => {
         if (trainingsplan) {
@@ -41,12 +44,13 @@ export default function App() {
             <Text style={styles.paragraph}>{firstname} {lastname}</Text>
             <Button title={"Ausloggen"} onPress={() => {
                 firebase.app().auth().signOut()
+                router.replace("../");
+                console.log("logged out")
             }}/>
 
             <Text style={styles.paragraph}>Trainingsplan ändern:</Text>
             <Text style={styles.paragraph}>{trainingsplan}</Text>
             <Button title={"Trainingsplan ändern"} onPress={() => {
-                console.log("press")
                 let newTrainingsplan = ""
                 if (trainingsplan === "abnehmen") {
                     newTrainingsplan = "muskelAufbau";
