@@ -69,7 +69,8 @@ export default function App() {
     }, []);
 
     useEffect(() => {
-        while (seconds >= 60) {
+        console.log(seconds)
+        while (seconds > 60) {
             setSeconds(seconds => seconds - 60)
             setMinutes(minutes => minutes + 1)
         }
@@ -84,12 +85,15 @@ export default function App() {
     }, [seconds])
 
     function nextTask() {
-        setTask(task => task + 1);
+        let newTask = task + 1;
+        setTask(newTask);
         console.log(trainingsplan?.length)
-        console.log(task)
-        if (trainingsplan && trainingsplan.length > task) {
-            setSeconds(trainingsplan[task].Dauer)
-        } else if(trainingsplan && trainingsplan.length === task){
+        console.log(newTask)
+        if (trainingsplan && trainingsplan.length > newTask) {
+            console.log(trainingsplan[newTask].Dauer)
+            setSeconds(trainingsplan[newTask].Dauer)
+        } else if(trainingsplan && trainingsplan.length === newTask){
+            console.log("done")
             setDone(true);
         }
     }
@@ -195,6 +199,7 @@ export default function App() {
             <SafeAreaView style={styles.container}>
                 <View>
                     <Text style={styles.paragraph}>Training</Text>
+                    <Text style={styles.paragraph}>Um den Trainingsplan zu ändern gehe in die Einstellungen</Text>
                     <Button title={"Training Starten"} onPress={() => startTraining()}/>
                     <Text style={styles.paragraph}>Lauf</Text>
                     <Button title={"Lauf starten"} onPress={() => setRunning(true)}/>
