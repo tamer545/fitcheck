@@ -141,7 +141,7 @@ export default function App() {
                         <Button title={"Lauf beenden"} onPress={async () => {
                             await firebase.app().database()
                                 .ref(`users/${firebase.app().auth().currentUser?.uid}/runs/${await getNumberOfRuns() + 1}`)
-                                .set({runningCoords: runningCoords, steps: currentStepCount, time: currentTime})
+                                .set({runningCoords: runningCoords, steps: currentStepCount, time: currentTime, region: mapRegion})
                             setRunning(false)
                             setIsStopwatchStart(false);
                             setResetStopwatch(true);

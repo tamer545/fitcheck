@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {FlatList, StyleSheet, Text, View} from 'react-native';
 import firebase from "firebase/compat";
+import MapView, {MapMarker, MapPolyline} from "react-native-maps";
 
 
 export default function App() {
@@ -21,19 +22,31 @@ export default function App() {
 
 
     const ItemView = ({item}: any) => {
+        console.log(item)
         return (
             // Single Comes here which will be repeatative for the FlatListItems
             <View style={styles.container}>
                 <Text onPress={() => getItem(item)}>
                     {item?.time}
                 </Text>
+                <MapView
+                    style={{height: 300}}
+                    region={item?.region}
+                    zoomEnabled={false}
+                >
+                    <MapPolyline
+                        coordinates={item?.runningCoords || [{longitude: 0, latitude: 0}]}
+                        strokeWidth={10}
+                        strokeColor="#00a8ff"
+                    />
+                </MapView>
             </View>
         );
     };
 
     const getItem = (item: any) => {
         //Function for click on an item
-        alert('Id : ' + item?.time + ' Value : ' + item?.time);
+        alert('Zeit : ' + item?.time + ' Schritte : ' + item?.steps);
     };
 
     return (
