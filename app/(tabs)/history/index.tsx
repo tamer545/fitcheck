@@ -43,10 +43,14 @@ export default function App() {
                 // Single Comes here which will be repeatative for the FlatListItems
                 <View>
                     <Text style={styles.paragraph}>
-                        Lauf Nummer: {runs?.indexOf(item)} Laufzeit: {item?.time}
+                        Lauf Nummer: {runs?.indexOf(item)}
 
                     </Text>
-                    <Text style={styles.paragraph}>
+                    <Text style={styles.smallParagraph}>
+                        Laufzeit: {item?.time}
+
+                    </Text>
+                    <Text style={styles.smallParagraph}>
                         Durchgeführt am: {item?.timeOfRun}
                     </Text>
                     <MapView
@@ -90,7 +94,8 @@ const styles = StyleSheet.create({
         fontSize: 15,
         marginLeft: 30,
         marginRight: 30,
-        textAlign: "center"
+        textAlign: "center",
+        fontWeight: "bold"
     },
     heading: {
         marginTop: 20
@@ -98,4 +103,10 @@ const styles = StyleSheet.create({
     spinnerTextStyle: {
         color: '#FFF',
     },
+    smallParagraph: {
+        fontSize: 12,
+        marginLeft: 30,
+        marginRight: 30,
+        textAlign: "center"
+    }
 });
