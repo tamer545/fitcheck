@@ -1,7 +1,7 @@
 import {Redirect} from "expo-router";
 import React, {useState} from "react";
 import {createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword} from "firebase/auth";
-import {Button, SafeAreaView, StyleSheet, TextInput} from "react-native";
+import {Button, SafeAreaView, StyleSheet, TextInput, Text} from "react-native";
 import firebase from "firebase/compat";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -13,6 +13,7 @@ const Index = () => {
     const [register, setRegister] = useState(false);
     const [firstname, setFirstname] = useState("");
     const [lastname, setLastname] = useState("");
+    const [errorMessage, setErrorMessage] = useState("")
     const auth = getAuth();
     function loginWithEmailAndPassword() {
         signInWithEmailAndPassword(auth, email, password)
@@ -27,6 +28,7 @@ const Index = () => {
                 setLoggedIn(false)
                 const errorCode = error.code;
                 const errorMessage = error.message;
+                setErrorMessage(errorMessage)
                 console.log(errorMessage)
             });
     }
@@ -46,6 +48,7 @@ const Index = () => {
                 .catch((error) => {
                     const errorCode = error.code;
                     const errorMessage = error.message;
+                    setErrorMessage(errorMessage)
                     console.log(errorMessage)
                 });
         }
@@ -93,11 +96,13 @@ const Index = () => {
                     placeholder="confirm Password"
                     keyboardType="visible-password"
                 />
+                <Text>{errorMessage}</Text>
                 <Button title={'Registrieren'} onPress={() => registerWithEmailAndPassword()}/>
                 <Button title={'Ich habe schon einen Account'} onPress={() => {
                     setEmail("");
                     setPassword("");
                     setRegister(false)
+                    setErrorMessage("")
                 }}/>
             </SafeAreaView>
         )
@@ -119,12 +124,14 @@ const Index = () => {
                     placeholder="Password"
                     keyboardType="visible-password"
                 />
+                <Text>{errorMessage}</Text>
                 <Button title={'Login'} onPress={() => loginWithEmailAndPassword()}/>
                 <Button title={'Registrieren'} onPress={() => {
                     setEmail("");
                     setPassword("");
                     setPasswordConfirm("");
                     setRegister(true)
+                    setErrorMessage("")
                 }}/>
             </SafeAreaView>
         )
