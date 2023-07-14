@@ -85,12 +85,14 @@ const Index = () => {
                     onChangeText={(text) => setPassword(text)}
                     value={password}
                     placeholder="Password"
+                    secureTextEntry
                     keyboardType="visible-password"
                 />
                 <TextInput
                     style={styles.input}
                     onChangeText={(text) => setPasswordConfirm(text)}
                     value={passwordConfirm}
+                    secureTextEntry
                     placeholder="confirm Password"
                     keyboardType="visible-password"
                 />
@@ -120,6 +122,7 @@ const Index = () => {
                 onChangeText={(text) => setPassword(text)}
                 value={password}
                 placeholder="Password"
+                secureTextEntry
                 keyboardType="visible-password"
             />
             <Text style={styles.error}>{errorMessage}</Text>
