@@ -109,7 +109,7 @@ export default function App() {
                     </View>
                 ) : (
                     <View style={styles.container}>
-                        <Text>Geocodes</Text>
+                        <Text style={styles.title}>Geocodes</Text>
                         <Text
                             style={styles.paragraph}>Stadt: {geocode?.[0]?.city || "Currently unavailable"}</Text>
                         <Text
@@ -153,16 +153,20 @@ export default function App() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'flex-start',
+        alignItems: 'center',
         padding: 20,
     },
     paragraph: {
         fontSize: 12,
-        textAlign: 'left',
+        textAlign: 'center',
         marginTop: 5
     },
     heading: {
-        marginTop: 20
+        marginTop: 20,
+        fontWeight: "bold"
+    },
+    title: {
+        fontWeight: "bold"
     },
     spinnerTextStyle: {
         color: '#FFF',
