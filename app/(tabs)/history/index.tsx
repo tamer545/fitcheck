@@ -1,47 +1,52 @@
 import React, {useEffect, useState} from 'react';
-import {FlatList, StyleSheet, Text, View} from 'react-native';
+import {FlatList, SafeAreaView, StyleSheet, Text, View} from 'react-native';
 import firebase from "firebase/compat";
 import MapView, {MapMarker, MapPolyline} from "react-native-maps";
 
 
 export default function App() {
-    const [runs, setRuns] = useState([])
+    const [runs, setRuns] = useState<any[]>()
 
 
     useEffect(() => {
         (() => {
-            const allRuns = firebase.app().database()
+            firebase.app().database()
                 .ref(`users/${firebase.app().auth().currentUser?.uid}/runs`)
                 .get()
                 .then(snapshot => {
                     setRuns(snapshot.val())
-                    console.log("test", snapshot.val())
                 })
         })()
     }, [])
 
 
     const ItemView = ({item}: any) => {
-        console.log(item)
+        console.log(runs)
+        if (item) {
+            return (
+                // Single Comes here which will be repeatative for the FlatListItems
+                <View>
+                    <Text style={styles.paragraph} onPress={() => getItem(item)}>
+                        Lauf Nummer: {runs?.indexOf(item)} Laufzeit: {item?.time}
+                    </Text>
+                    <MapView
+                        style={{height: 200, margin: 30}}
+                        region={item?.region}
+                    >
+                        <MapPolyline
+                            coordinates={item?.runningCoords || [{longitude: 0, latitude: 0}]}
+                            strokeWidth={10}
+                            strokeColor="#00a8ff"
+                        />
+                    </MapView>
+                </View>
+            );
+        }
         return (
-            // Single Comes here which will be repeatative for the FlatListItems
-            <View style={styles.container}>
-                <Text onPress={() => getItem(item)}>
-                    {item?.time}
-                </Text>
-                <MapView
-                    style={{height: 300}}
-                    region={item?.region}
-                    zoomEnabled={false}
-                >
-                    <MapPolyline
-                        coordinates={item?.runningCoords || [{longitude: 0, latitude: 0}]}
-                        strokeWidth={10}
-                        strokeColor="#00a8ff"
-                    />
-                </MapView>
+            <View>
+
             </View>
-        );
+        )
     };
 
     const getItem = (item: any) => {
@@ -50,10 +55,10 @@ export default function App() {
     };
 
     return (
-        <View>
+        <SafeAreaView>
             <FlatList data={runs} renderItem={ItemView}/>
 
-        </View>
+        </SafeAreaView>
     )
 
 
@@ -66,8 +71,10 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     paragraph: {
-        fontSize: 20,
-        marginTop: 5,
+        fontSize: 15,
+        marginTop: 30,
+        marginLeft: 30,
+        marginRight: 30,
         textAlign: "center"
     },
     heading: {

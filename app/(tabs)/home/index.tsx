@@ -146,6 +146,7 @@ export default function App() {
                             setIsStopwatchStart(false);
                             setResetStopwatch(true);
                             setRunningCoords([])
+                            setCurrentStepCount(0)
                         }}/>
                         <View style={styles.sectionStyle}>
                             <Stopwatch
