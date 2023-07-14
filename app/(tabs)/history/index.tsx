@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
-import {FlatList, RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {FlatList, RefreshControl, SafeAreaView, StyleSheet, Text, View} from 'react-native';
 import firebase from "firebase/compat";
-import MapView, {MapMarker, MapPolyline} from "react-native-maps";
+import MapView, {MapPolyline} from "react-native-maps";
 
 
 export default function App() {

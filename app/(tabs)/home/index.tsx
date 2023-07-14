@@ -1,17 +1,13 @@
 import React, {useEffect, useState} from 'react';
-import {Button, SafeAreaView, StyleSheet, Text, TouchableHighlight, View} from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
-import {SafeAreaView, StyleSheet, Text, View, TouchableHighlight, Button} from 'react-native';
+import {Button, SafeAreaView, StyleSheet, Text, View} from 'react-native';
 // @ts-ignore
 import {Stopwatch, Timer} from 'react-native-stopwatch-timer';
 import * as Location from "expo-location";
-import {LocationAccuracy, LocationObject, LocationObjectCoords, LocationSubscription} from "expo-location";
+import {LocationAccuracy, LocationObject, LocationSubscription} from "expo-location";
 import Spinner from "react-native-loading-spinner-overlay";
 import MapView, {MapMarker, MapPolyline} from "react-native-maps";
 import {Pedometer} from "expo-sensors";
 
-// @ts-ignore
-import {Stopwatch, Timer} from 'react-native-stopwatch-timer';
 import firebase from "firebase/compat";
 
 export default function App() {
@@ -108,7 +104,7 @@ export default function App() {
         if (trainingsplan && trainingsplan.length > newTask) {
             console.log(trainingsplan[newTask].Dauer)
             setSeconds(trainingsplan[newTask].Dauer)
-        } else if(trainingsplan && trainingsplan.length === newTask){
+        } else if (trainingsplan && trainingsplan.length === newTask) {
             console.log("done")
             setDone(true);
         }
@@ -134,7 +130,7 @@ export default function App() {
         setTraining(true);
     }
 
-    if (done){
+    if (done) {
         return (
             <SafeAreaView style={styles.container}>
                 <Text style={styles.paragraph}>
@@ -165,7 +161,7 @@ export default function App() {
                 setPastStepCount(pastStepCountResult.steps);
             }
 
-            return Pedometer.watchStepCount(result => {
+            return Pedometer.watchStepCount((result: any) => {
                 setCurrentStepCount(result.steps);
             });
         }
@@ -220,7 +216,13 @@ export default function App() {
                         <Button title={"Lauf beenden"} onPress={async () => {
                             await firebase.app().database()
                                 .ref(`users/${firebase.app().auth().currentUser?.uid}/runs/${await getNumberOfRuns() + 1}`)
-                                .set({runningCoords: runningCoords, steps: currentStepCount, time: currentTime, region: mapRegion, timeOfRun: new Date().toLocaleString()})
+                                .set({
+                                    runningCoords: runningCoords,
+                                    steps: currentStepCount,
+                                    time: currentTime,
+                                    region: mapRegion,
+                                    timeOfRun: new Date().toLocaleString()
+                                })
                             setRunning(false)
                             setIsStopwatchStart(false);
                             setResetStopwatch(true);

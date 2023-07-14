@@ -1,12 +1,10 @@
 import React, {useEffect, useState} from 'react';
-import {Button, SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import {SafeAreaView, StyleSheet, Text, View} from 'react-native';
 import * as Location from 'expo-location';
 import {LocationAccuracy, LocationGeocodedAddress, LocationObjectCoords, LocationSubscription} from 'expo-location';
 import Spinner from "react-native-loading-spinner-overlay";
 import MapView, {Marker} from "react-native-maps";
-import * as child_process from "child_process";
 import {getRecommendations} from "./recommendations";
-import firebase from "firebase/compat";
 
 export default function App() {
     const [currentLocation, setCurrentLocation] = useState<LocationObjectCoords>();
@@ -21,7 +19,6 @@ export default function App() {
         latitudeDelta: 0,
         longitudeDelta: 0,
     });
-
 
 
     useEffect(() => {
@@ -80,7 +77,7 @@ export default function App() {
     }, [currentLocation])
 
 
-    const getWeather = async (latitude: number, longitude:number) => {
+    const getWeather = async (latitude: number, longitude: number) => {
         const api_call = await
             fetch(`//api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=406439182dd5d5f377e4b5c34dd8c694&units=metric&lang=de`);
         const data = await api_call.json();

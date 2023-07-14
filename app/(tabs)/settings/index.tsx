@@ -9,7 +9,7 @@ export default function App() {
     const [possibleTrainingsplans, setPossibleTrainingsplans] = useState<string[]>()
 
     useEffect(() => {
-        if (trainingsplan){
+        if (trainingsplan) {
             firebase.app().database()
                 .ref(`users/${firebase.app().auth().currentUser?.uid}/details`)
                 .set({
@@ -50,7 +50,7 @@ export default function App() {
                 let newTrainingsplan = ""
                 if (trainingsplan === "abnehmen") {
                     newTrainingsplan = "muskelAufbau";
-                }else {
+                } else {
                     newTrainingsplan = "abnehmen";
                 }
 

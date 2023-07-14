@@ -1,7 +1,7 @@
 import {Redirect} from "expo-router";
 import React, {useState} from "react";
 import {createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword} from "firebase/auth";
-import {Button, SafeAreaView, StyleSheet, TextInput, Text} from "react-native";
+import {Button, SafeAreaView, StyleSheet, Text, TextInput} from "react-native";
 import firebase from "firebase/compat";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -15,6 +15,7 @@ const Index = () => {
     const [lastname, setLastname] = useState("");
     const [errorMessage, setErrorMessage] = useState("")
     const auth = getAuth();
+
     function loginWithEmailAndPassword() {
         signInWithEmailAndPassword(auth, email, password)
             .then(async (userCredential) => {
@@ -33,8 +34,8 @@ const Index = () => {
             });
     }
 
-    function registerWithEmailAndPassword(){
-        if (password == passwordConfirm){
+    function registerWithEmailAndPassword() {
+        if (password == passwordConfirm) {
             createUserWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
                     // Signed in
@@ -54,11 +55,11 @@ const Index = () => {
         }
     }
 
-    if (loggedIn){
-        return <Redirect href="/home" />;
+    if (loggedIn) {
+        return <Redirect href="/home"/>;
     }
 
-    if (register){
+    if (register) {
         return (
             <SafeAreaView style={styles.container}>
                 <TextInput
@@ -109,32 +110,32 @@ const Index = () => {
     }
 
     return (
-            <SafeAreaView style={styles.container}>
-                <TextInput
-                    style={styles.input}
-                    onChangeText={(text) => setEmail(text)}
-                    value={email}
-                    placeholder="E-Mail"
-                    keyboardType="email-address"
-                />
-                <TextInput
-                    style={styles.input}
-                    onChangeText={(text) => setPassword(text)}
-                    value={password}
-                    placeholder="Password"
-                    keyboardType="visible-password"
-                />
-                <Text>{errorMessage}</Text>
-                <Button title={'Login'} onPress={() => loginWithEmailAndPassword()}/>
-                <Button title={'Registrieren'} onPress={() => {
-                    setEmail("");
-                    setPassword("");
-                    setPasswordConfirm("");
-                    setRegister(true)
-                    setErrorMessage("")
-                }}/>
-            </SafeAreaView>
-        )
+        <SafeAreaView style={styles.container}>
+            <TextInput
+                style={styles.input}
+                onChangeText={(text) => setEmail(text)}
+                value={email}
+                placeholder="E-Mail"
+                keyboardType="email-address"
+            />
+            <TextInput
+                style={styles.input}
+                onChangeText={(text) => setPassword(text)}
+                value={password}
+                placeholder="Password"
+                keyboardType="visible-password"
+            />
+            <Text>{errorMessage}</Text>
+            <Button title={'Login'} onPress={() => loginWithEmailAndPassword()}/>
+            <Button title={'Registrieren'} onPress={() => {
+                setEmail("");
+                setPassword("");
+                setPasswordConfirm("");
+                setRegister(true)
+                setErrorMessage("")
+            }}/>
+        </SafeAreaView>
+    )
 };
 export default Index;
 const styles = StyleSheet.create({
